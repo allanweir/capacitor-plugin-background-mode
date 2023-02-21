@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 /**
@@ -93,7 +94,9 @@ public class ForegroundService extends Service {
     private void keepAwake() {
         boolean isSilent = mSettings.getSilent();
         if (!isSilent) {
-            startForeground(NOTIFICATION_ID, makeNotification());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForeground(NOTIFICATION_ID, makeNotification());
+            }
         }
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
@@ -119,6 +122,7 @@ public class ForegroundService extends Service {
      * Create a notification as the visible part to be able to put the service
      * in a foreground state by using the default settings.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private Notification makeNotification() {
         return makeNotification(mSettings);
     }
@@ -129,6 +133,7 @@ public class ForegroundService extends Service {
      *
      * @param settings The config settings
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private Notification makeNotification (BackgroundModeSettings settings) {
         // use channelId for Oreo and higher
         String CHANNEL_ID = "capacitor-plugin-background-mode-id";
@@ -149,7 +154,7 @@ public class ForegroundService extends Service {
         String text = settings.getText();
         boolean bigText = settings.getBigText();
         String subText = settings.getSubText();
-        Boolean showWhen = settings.getShowWhen();
+        boolean showWhen = settings.getShowWhen();
         Visibility visibility = settings.getVisibility();
 
         Context context = getApplicationContext();
@@ -173,7 +178,7 @@ public class ForegroundService extends Service {
             notification.setSubText(subText);
         }
 
-        Boolean allowClose = settings.getAllowClose();
+        boolean allowClose = settings.getAllowClose();
         if (allowClose) {
 
             final Intent closeAppIntent = new Intent("com.backgroundmode.close" + pkgName);
@@ -184,7 +189,7 @@ public class ForegroundService extends Service {
             notification.addAction(closeAction.build());
         }
 
-        Boolean hidden = settings.getHidden();
+        boolean hidden = settings.getHidden();
         if (hidden) {
             notification.setPriority(NotificationCompat.PRIORITY_MIN);
         }
@@ -198,7 +203,7 @@ public class ForegroundService extends Service {
         String hexColor = settings.getColor();
         setColor(notification, hexColor);
 
-        Boolean resume = settings.getResume();
+        boolean resume = settings.getResume();
         if (intent != null && resume) {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent contentIntent = PendingIntent.getActivity(
@@ -223,8 +228,10 @@ public class ForegroundService extends Service {
             return;
         }
 
-        Notification notification = makeNotification(settings);
-        getNotificationManager().notify(NOTIFICATION_ID, notification);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Notification notification = makeNotification(settings);
+            getNotificationManager().notify(NOTIFICATION_ID, notification);
+        }
     }
 
     /**

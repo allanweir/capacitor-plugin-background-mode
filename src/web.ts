@@ -57,4 +57,7 @@ export class BackgroundModeWeb
     async unlock(): Promise<void>{
       throw this.unimplemented('Not implemented on web.');
     }
+    async sdkVersion(): Promise<{version: number}> {
+      throw this.unimplemented('Not implemented on web.');
+    }
 }

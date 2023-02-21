@@ -37,6 +37,7 @@ export interface BackgroundModePlugin {
   isActive(): Promise<{activated: boolean}>;
   wakeUp(): Promise<void>;
   unlock(): Promise<void>;
+  sdkVersion(): Promise<{version: number}>;
 
   addListener(
     eventName: 'appInBackground',

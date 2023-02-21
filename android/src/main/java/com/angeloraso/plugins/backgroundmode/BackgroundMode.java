@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -97,7 +98,9 @@ public class BackgroundMode {
 
             thread.start();
         }
-        backgroundModeEventListener.onBackgroundModeEvent(EVENT_APP_IN_BACKGROUND);
+        if (backgroundModeEventListener != null) {
+            backgroundModeEventListener.onBackgroundModeEvent(EVENT_APP_IN_BACKGROUND);
+        }
     }
 
     public void onResume() {
@@ -107,7 +110,9 @@ public class BackgroundMode {
         }
 
         stopService();
-        backgroundModeEventListener.onBackgroundModeEvent(EVENT_APP_IN_FOREGROUND);
+        if (backgroundModeEventListener != null) {
+            backgroundModeEventListener.onBackgroundModeEvent(EVENT_APP_IN_FOREGROUND);
+        }
     }
 
     public void onDestroy() {
@@ -140,8 +145,10 @@ public class BackgroundMode {
         Intent intent = new Intent(mContext, ForegroundService.class);
 
         try {
-            mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-            mContext.startForegroundService(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                mContext.startForegroundService(intent);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -172,7 +179,10 @@ public class BackgroundMode {
     public boolean isIgnoringBatteryOptimizations() {
         String pkgName = mActivity.getPackageName();
         PowerManager pm = (PowerManager) mActivity.getSystemService(POWER_SERVICE);
-        boolean isIgnoring = pm.isIgnoringBatteryOptimizations(pkgName);
+        boolean isIgnoring = false;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            isIgnoring = pm.isIgnoringBatteryOptimizations(pkgName);
+        }
         return isIgnoring;
     }
 
@@ -193,13 +203,16 @@ public class BackgroundMode {
     public void enableWebViewOptimizations() {
         mSettings.setDisableWebViewOptimization(false);
     }
-    
+
     public void disableWebViewOptimizations() {
         mSettings.setDisableWebViewOptimization(true);
     }
 
     public boolean checkForegroundPermission() {
-        return Settings.canDrawOverlays(mActivity);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(mActivity);
+        }
+        return false;
     }
 
     public void requestForegroundPermission() {
@@ -252,11 +265,13 @@ public class BackgroundMode {
 
     private void clearScreenAndKeyguardFlags() {
         mActivity.runOnUiThread(
-            () -> {
-                mActivity.setShowWhenLocked(false);
-                mActivity.setTurnScreenOn(false);
-                mActivity.getWindow().clearFlags(FLAGS);
-            }
+                () -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                        mActivity.setShowWhenLocked(false);
+                        mActivity.setTurnScreenOn(false);
+                    }
+                    mActivity.getWindow().clearFlags(FLAGS);
+                }
         );
     }
 
@@ -299,11 +314,13 @@ public class BackgroundMode {
 
     private void addScreenAndKeyguardFlags() {
         mActivity.runOnUiThread(
-            () -> {
-                mActivity.setShowWhenLocked(true);
-                mActivity.setTurnScreenOn(true);
-                mActivity.getWindow().addFlags(FLAGS);
-            }
+                () -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                        mActivity.setShowWhenLocked(true);
+                        mActivity.setTurnScreenOn(true);
+                    }
+                    mActivity.getWindow().addFlags(FLAGS);
+                }
         );
     }
 

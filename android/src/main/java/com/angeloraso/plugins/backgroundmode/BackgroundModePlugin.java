@@ -1,6 +1,7 @@
 package com.angeloraso.plugins.backgroundmode;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.getcapacitor.JSObject;
@@ -201,6 +202,13 @@ public class BackgroundModePlugin extends Plugin {
     public void disableWebViewOptimizations(PluginCall call) {
         backgroundMode.disableWebViewOptimizations();
         call.resolve();
+    }
+
+    @PluginMethod
+    public void sdkVersion(PluginCall call) {
+        JSObject res = new JSObject();
+        res.put("version", Build.VERSION.SDK_INT);
+        call.resolve(res);
     }
 
     private BackgroundModeSettings buildSettings(BackgroundModeSettings settings, PluginCall call) {
