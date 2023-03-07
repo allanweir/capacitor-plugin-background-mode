@@ -95,7 +95,11 @@ public class ForegroundService extends Service {
         boolean isSilent = mSettings.getSilent();
         if (!isSilent) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForeground(NOTIFICATION_ID, makeNotification());
+                try {
+                    startForeground(NOTIFICATION_ID, makeNotification());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -109,8 +113,16 @@ public class ForegroundService extends Service {
      */
     private void sleepWell()
     {
-        stopForeground(true);
-        getNotificationManager().cancel(NOTIFICATION_ID);
+        try {
+            stopForeground(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            getNotificationManager().cancel(NOTIFICATION_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (mWakeLock != null) {
             mWakeLock.release();
