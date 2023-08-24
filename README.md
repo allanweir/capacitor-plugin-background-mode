@@ -30,6 +30,7 @@ npx cap sync
 * [`isActive()`](#isactive)
 * [`wakeUp()`](#wakeup)
 * [`unlock()`](#unlock)
+* [`sdkVersion()`](#sdkversion)
 * [`addListener('appInBackground', ...)`](#addlistenerappinbackground)
 * [`addListener('appInForeground', ...)`](#addlistenerappinforeground)
 * [`removeAllListeners()`](#removealllisteners)
@@ -206,6 +207,17 @@ wakeUp() => Promise<void>
 ```typescript
 unlock() => Promise<void>
 ```
+
+--------------------
+
+
+### sdkVersion()
+
+```typescript
+sdkVersion() => Promise<{ version: number; }>
+```
+
+**Returns:** <code>Promise&lt;{ version: number; }&gt;</code>
 
 --------------------
 
